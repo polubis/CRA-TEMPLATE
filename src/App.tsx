@@ -1,23 +1,28 @@
-import logo from "./logo.svg";
-import style from "./App.module.scss";
+import { ChangePassword, Register } from "containers";
+import { Tabs } from "ui";
+import { Fragment, useState } from "react";
+
+import css from "./App.module.scss";
+
+const EXAMPLES = ["Register", "Change password"];
 
 function App() {
+  const [activeExample, setActiveExample] = useState(EXAMPLES[0]);
+
   return (
-    <div className={style.App}>
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={css.layout}>
+      <Tabs
+        className={css.tabs}
+        active={activeExample}
+        onClick={setActiveExample}
+      >
+        {EXAMPLES.map((example) => (
+          <Fragment key={example}>{example}</Fragment>
+        ))}
+      </Tabs>
+
+      {activeExample === EXAMPLES[0] && <Register />}
+      {activeExample === EXAMPLES[1] && <ChangePassword />}
     </div>
   );
 }

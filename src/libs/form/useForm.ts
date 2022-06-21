@@ -17,6 +17,7 @@ const validate = <V extends Values>(
   fns: Fns<V>
 ): ValidationResult<V> => {
   let invalid = false,
+    invalidCount = 0,
     errors = {} as Errors<V>;
 
   for (let i = 0; i < keys.length; i++) {
@@ -27,17 +28,27 @@ const validate = <V extends Values>(
 
     for (let j = 0; j < safeFns.length; j++) {
       const fn = safeFns[j];
-      const error = fn(value);
+      const error = fn(value, values);
 
       if (error !== "") {
         invalid = true;
         errors[key] = error;
+        invalidCount++;
         break;
       }
     }
   }
 
-  return { invalid, errors, valid: !invalid };
+  const validCount = keys.length - invalidCount;
+
+  return {
+    invalid,
+    errors,
+    valid: !invalid,
+    validCount,
+    progress: +((validCount / keys.length) * 100).toFixed(2),
+    invalidCount,
+  };
 };
 
 const createMetadata = (touched: boolean, confirmed: boolean): Metadata => ({
@@ -46,6 +57,8 @@ const createMetadata = (touched: boolean, confirmed: boolean): Metadata => ({
   confirmed,
   unconfirmed: !confirmed,
 });
+
+const isDebugAvailable = (): boolean => /localhost/.test(window.location.href);
 
 export const useForm = <V extends Values>(initValues: V, fns: Fns<V> = {}) => {
   const [, setCounter] = useState(0);
@@ -79,6 +92,11 @@ export const useForm = <V extends Values>(initValues: V, fns: Fns<V> = {}) => {
   const change = (e: ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
     const key = e.target.name;
+
+    if (!isDebugAvailable()) {
+      set(key, value as V[keyof V]);
+      return;
+    }
 
     if (!key) {
       console.error("Lack of name property in input element");

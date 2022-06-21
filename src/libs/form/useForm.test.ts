@@ -31,6 +31,9 @@ describe("useForm()", () => {
 
       expect(result.current.errors).toEqual({ username: MESSAGE });
       expect(result.current.invalid).toBeTruthy();
+      expect(result.current.validCount).toBe(0);
+      expect(result.current.progress).toBe(0);
+      expect(result.current.invalidCount).toBe(1);
       expect(result.current.valid).toBeFalsy();
     });
 
@@ -42,6 +45,24 @@ describe("useForm()", () => {
       expect(result.current.untouched).toBeTruthy();
       expect(result.current.confirmed).toBeFalsy();
       expect(result.current.unconfirmed).toBeTruthy();
+    });
+  });
+
+  describe("during validation", () => {
+    it("injects value and values to validator function", () => {
+      const USERNAME = "user1994";
+      const VALUES = { username: "", password: "" };
+      const spy = jest.fn();
+      const { result } = renderHook(() => useForm(VALUES, { username: [spy] }));
+
+      act(() => {
+        result.current.set("username", USERNAME);
+      });
+
+      expect(spy).toHaveBeenCalledWith(USERNAME, {
+        username: USERNAME,
+        password: "",
+      });
     });
   });
 
@@ -76,6 +97,9 @@ describe("useForm()", () => {
 
       expect(result.current.invalid).toBeTruthy();
       expect(result.current.valid).toBeFalsy();
+      expect(result.current.validCount).toBe(1);
+      expect(result.current.progress).toBe(50);
+      expect(result.current.invalidCount).toBe(1);
       expect(result.current.errors).toEqual({
         username: MESSAGE,
         password: "",
@@ -114,6 +138,9 @@ describe("useForm()", () => {
 
       expect(result.current.invalid).toBeTruthy();
       expect(result.current.valid).toBeFalsy();
+      expect(result.current.validCount).toBe(1);
+      expect(result.current.progress).toBe(50);
+      expect(result.current.invalidCount).toBe(1);
       expect(result.current.errors).toEqual({
         username: MESSAGE,
         password: "",
@@ -150,6 +177,9 @@ describe("useForm()", () => {
 
       expect(result.current.invalid).toBeTruthy();
       expect(result.current.valid).toBeFalsy();
+      expect(result.current.validCount).toBe(1);
+      expect(result.current.progress).toBe(50);
+      expect(result.current.invalidCount).toBe(1);
       expect(result.current.errors).toEqual({
         username: MESSAGE,
         password: "",
@@ -216,6 +246,9 @@ describe("useForm()", () => {
 
       expect(result.current.invalid).toBeTruthy();
       expect(result.current.valid).toBeFalsy();
+      expect(result.current.validCount).toBe(1);
+      expect(result.current.progress).toBe(50);
+      expect(result.current.invalidCount).toBe(1);
       expect(result.current.errors).toEqual({
         username: MESSAGE,
         password: "",
@@ -301,13 +334,15 @@ describe("useForm()", () => {
       act(() => {
         result.current.set("username", "jacob1994");
         result.current.set("password", "example");
-        result.current.reset()
+        result.current.reset();
       });
 
       expect(result.current.invalid).toBeFalsy();
       expect(result.current.valid).toBeTruthy();
       expect(result.current.touched).toBeFalsy();
       expect(result.current.untouched).toBeTruthy();
+      expect(result.current.values).toEqual(VALUES);
+      expect(result.current.errors).toEqual({ username: "", password: "" });
     });
   });
 

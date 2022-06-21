@@ -1,10 +1,10 @@
 import { ChangeEvent } from "react";
-import { Observable, Subscription } from "rxjs";
+import { Observable } from "rxjs";
 
-export type Values = Record<string, unknown>;
-export type Fn<T> = (value: T) => string;
+export type Values = Record<string, any>;
+export type Fn<V extends Values, T> = (value: T, values: V) => string;
 export type Fns<V extends Values> = {
-  [K in keyof V]?: Fn<V[K]>[];
+  [K in keyof V]?: Fn<V, V[K]>[];
 };
 export type Errors<V extends Values> = {
   [K in keyof V]: string;
@@ -13,6 +13,9 @@ export interface ValidationResult<V extends Values> {
   invalid: boolean;
   valid: boolean;
   errors: Errors<V>;
+  validCount: number;
+  progress: number;
+  invalidCount: number;
 }
 export interface Metadata {
   touched: boolean;
